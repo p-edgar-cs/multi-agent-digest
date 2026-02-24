@@ -1,1 +1,1 @@
-flask
+openai>=1.0
