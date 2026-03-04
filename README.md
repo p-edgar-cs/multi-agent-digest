@@ -28,3 +28,14 @@ To run locally with Docker Compose:
 ```bash
 docker-compose up --build
 ```
+
+To test locally:
+```bash
+# create a venv named “.venv” (only once)
+python3 -m venv .venv
+
+# then activate it
+source .venv/bin/activate        # macOS / Linux
+pip install pytest
+python -m pytest tests/ -v
+```

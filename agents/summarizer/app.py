@@ -4,6 +4,14 @@ import json
 import time
 from openai import OpenAI, RateLimitError, APIError
 
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "timestamp": self.formatTime(record),
+            "level": record.levelname,
+            "agent": record.name,
+            "message": record.getMessage(),
+        })
 handler = logging.StreamHandler()
 handler.setFormatter(JSONFormatter())
 logger = logging.getLogger("summarizer")
@@ -26,14 +34,6 @@ SYSTEM_PROMPT = (
 MAX_RETRIES = 3
 RETRY_DELAY = 5  # seconds
 
-class JSONFormatter(logging.Formatter):
-    def format(self, record):
-        return json.dumps({
-            "timestamp": self.formatTime(record),
-            "level": record.levelname,
-            "agent": record.name,
-            "message": record.getMessage(),
-        })
 
 def summarize(text, retries=MAX_RETRIES):
     """Call the LLM API with retry logic for rate limits."""
@@ -46,7 +46,7 @@ def summarize(text, retries=MAX_RETRIES):
                     {"role": "user", "content": text[:8000]}
                 ],
                 max_tokens=1000,
-                temperature=0.3,
+                temperature=0.3, # lower temperature for more focused summaries
             )
             return response.choices[0].message.content
         except RateLimitError:
