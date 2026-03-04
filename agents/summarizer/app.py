@@ -1,12 +1,23 @@
 import os
 import logging
+import json
 import time
 from openai import OpenAI, RateLimitError, APIError
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "timestamp": self.formatTime(record),
+            "level": record.levelname,
+            "agent": record.name,
+            "message": record.getMessage(),
+        })
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger = logging.getLogger("summarizer")
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 logger = logging.getLogger("summarizer")
 
 INPUT_FILE = "/data/ingested.txt"
@@ -23,6 +34,7 @@ SYSTEM_PROMPT = (
 MAX_RETRIES = 3
 RETRY_DELAY = 5  # seconds
 
+
 def summarize(text, retries=MAX_RETRIES):
     """Call the LLM API with retry logic for rate limits."""
     for attempt in range(retries):
@@ -34,7 +46,7 @@ def summarize(text, retries=MAX_RETRIES):
                     {"role": "user", "content": text[:8000]}
                 ],
                 max_tokens=1000,
-                temperature=0.3,
+                temperature=0.3, # lower temperature for more focused summaries
             )
             return response.choices[0].message.content
         except RateLimitError:
