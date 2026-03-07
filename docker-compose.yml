@@ -12,7 +12,7 @@ services:
     build: ./agents/summarizer
     container_name: agent_summarizer
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
       ingestor:
         condition: service_completed_successfully
@@ -40,6 +40,8 @@ services:
     depends_on:
       prioritizer:
         condition: service_completed_successfully
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
     volumes:
       - ./data:/data
       - ./output:/output

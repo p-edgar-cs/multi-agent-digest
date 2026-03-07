@@ -2,7 +2,7 @@ import os
 import logging
 import json
 import time
-from openai import OpenAI, RateLimitError, APIError
+from groq import Groq, RateLimitError, APIError
 
 class JSONFormatter(logging.Formatter):
     def format(self, record):
@@ -12,18 +12,17 @@ class JSONFormatter(logging.Formatter):
             "agent": record.name,
             "message": record.getMessage(),
         })
+
 handler = logging.StreamHandler()
 handler.setFormatter(JSONFormatter())
 logger = logging.getLogger("summarizer")
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-logger = logging.getLogger("summarizer")
-
 INPUT_FILE = "/data/ingested.txt"
 OUTPUT_FILE = "/data/summary.txt"
 
-client = OpenAI()  # reads OPENAI_API_KEY from environment
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 SYSTEM_PROMPT = (
     "You are a helpful assistant that summarizes long text "
@@ -36,17 +35,17 @@ RETRY_DELAY = 5  # seconds
 
 
 def summarize(text, retries=MAX_RETRIES):
-    """Call the LLM API with retry logic for rate limits."""
+    """Call the Groq API with retry logic for rate limits."""
     for attempt in range(retries):
         try:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": text[:8000]}
                 ],
                 max_tokens=1000,
-                temperature=0.3, # lower temperature for more focused summaries
+                temperature=0.3,
             )
             return response.choices[0].message.content
         except RateLimitError:
@@ -57,6 +56,7 @@ def summarize(text, retries=MAX_RETRIES):
             logger.error(f"API error: {e}")
             raise
     raise RuntimeError("Max retries exceeded for LLM API call")
+
 
 def main():
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
@@ -75,6 +75,7 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(summary)
     logger.info(f"Summary written to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()
