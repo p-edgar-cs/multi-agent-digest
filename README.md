@@ -95,7 +95,7 @@ cat output/metrics.json      # run stats
 
 ---
 
-## Scheduling Daily Runs (macOS)
+## Scheduling Daily Runs (macOS - optional)
 
 Run the pipeline automatically every morning at 7am:
 
@@ -109,7 +109,7 @@ View logs after a scheduled run:
 ```bash
 cat pipeline.log
 ```
-
+Note your machine must be on and docker on
 ---
 
 ## Running Tests
