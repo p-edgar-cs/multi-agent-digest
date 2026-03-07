@@ -95,7 +95,7 @@ cat output/metrics.json      # run stats
 
 ---
 
-## Scheduling Daily Runs (macOS - optional)
+## Scheduling Daily Runs (macOS)
 
 Run the pipeline automatically every morning at 7am:
 
@@ -109,7 +109,7 @@ View logs after a scheduled run:
 ```bash
 cat pipeline.log
 ```
-Note your machine must be on and docker on
+
 ---
 
 ## Running Tests
@@ -164,3 +164,49 @@ multi-agent-digest/
 - **Docker + Docker Compose**
 - **Groq API** — llama-3.1-8b-instant (free tier)
 - **Slack Incoming Webhooks** — for digest delivery
+
+---
+
+## Potential Applications
+
+The multi-agent pipeline pattern used here is not limited to daily digests. The same architecture — ingest, transform, prioritize, deliver — applies across a wide range of real-world problems. Swapping out the input data and agent logic is all it takes to adapt it.
+
+### Data Engineering
+The pipeline mirrors a classic ETL (Extract, Transform, Load) workflow. Instead of personal notes, point it at raw datasets and each agent handles one step of the data processing chain.
+
+| Agent | ETL Role | Example |
+|-------|----------|---------|
+| Ingestor | Extract | Pull provider records from multiple state databases |
+| Summarizer | Transform | Normalize, clean, and classify records using LLM |
+| Prioritizer | Business Logic | Score records by compliance rules or urgency |
+| Formatter | Load | Write results to a database, CSV, or dashboard |
+
+Real-world example: a healthcare company could use this to process insurance network provider data across all 50 states, flag adequacy gaps, and deliver a daily compliance report.
+
+### Full Stack Integration
+The pipeline can sit behind a Django REST API, turning it into a backend service that a React frontend can trigger and display results from.
+
+```
+React Frontend
+    ↓ user uploads a document or triggers a run
+Django API
+    ↓ kicks off the pipeline
+Multi-Agent Pipeline
+    ↓ processes data and writes results
+Django API
+    ↓ serves results back as JSON
+React Frontend
+    displays prioritized insights to the user
+```
+
+### Business Intelligence
+Replace the notes file with sales data, customer feedback, or support tickets. The summarizer extracts key themes, the prioritizer surfaces urgent issues, and the formatter delivers a daily business briefing to a Slack channel.
+
+### Content Moderation
+Feed user-generated content through the pipeline. The summarizer classifies content, the prioritizer flags high-risk items, and the formatter routes flagged content to a moderation queue.
+
+### Security & DevOps
+Point the ingestor at server logs or security alerts. The summarizer groups related events, the prioritizer scores by severity, and the formatter delivers a daily incident report with only the critical items highlighted.
+
+### Research & Competitive Intelligence
+Feed the pipeline news articles, academic papers, or competitor announcements. The summarizer extracts key findings, the prioritizer ranks by relevance to your domain, and the formatter delivers a structured briefing every morning.
